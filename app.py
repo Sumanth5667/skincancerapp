@@ -20,7 +20,7 @@ def top_2_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=2)
 
 # Load model and cache it
-@st.cache_data
+@st.cache_resource
 def load_model_once():
     model = load_model('inceptinv1.h5')
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', top_3_accuracy, top_2_accuracy])
