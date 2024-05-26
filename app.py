@@ -19,11 +19,18 @@ def top_3_accuracy(y_true, y_pred):
 def top_2_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=2)
 
-# Load model once to avoid repeated loading
-model = load_model('inceptinv1.h5')
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', top_3_accuracy, top_2_accuracy])
+# Load model and cache it
+@st.cache_data
+def load_model_once():
+    model = load_model('inceptinv1.h5')
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', top_3_accuracy, top_2_accuracy])
+    return model
 
-def predict(image):
+model = load_model_once()
+
+# Cache the prediction function
+@st.cache_data
+def cached_predict(image):
     img = img_to_array(image)
     img = img / 255.0
     img = smart_resize(img, (380, 380))  # Resize the image
@@ -31,6 +38,8 @@ def predict(image):
     predictions = model.predict(img)
     return predictions
 
+# Cache the PDF generation function
+@st.cache_data
 def generate_pdf(user_name, user_location, gender, date_of_birth, lesion_area, current_time, image, predictions, top_3_classes, top_3_probs):
     pdf = FPDF()
     pdf.add_page()
@@ -109,8 +118,8 @@ st.sidebar.markdown(demo_note)
 st.title('Skin Cancer Classification App')
 
 # User input
-user_name = st.text_input("Enter your name",placeholder="Full Name")
-user_location = st.text_input("Enter your location",placeholder='Country')
+user_name = st.text_input("Enter your name", placeholder="Full Name")
+user_location = st.text_input("Enter your location", placeholder='Country')
 current_time = st.text_input("Current time and date", str(datetime.datetime.now()))
 date_of_birth = st.date_input("Enter your date of birth", min_value=datetime.date(1965, 1, 1), max_value=datetime.date.today())
 lesion_area = st.selectbox("Select lesion area", ["Head", "Torso", "Arm", "Leg", "Other"])
@@ -125,7 +134,7 @@ if uploaded_file is not None:
     if st.button('Predict'):
         with st.spinner("Analyzing the Lesion..."):
             time.sleep(1)  # Simulate waiting for verification and loading steps
-            predictions = predict(image)
+            predictions = cached_predict(image)
 
         # Define your classes (if you haven't already)
         classes = {
@@ -156,7 +165,6 @@ if uploaded_file is not None:
         fig.update_layout(title='Class Probabilities', xaxis_title='Classes', yaxis_title='Probability')
         st.plotly_chart(fig)
 
-
         # Generate PDF
         pdf_output = generate_pdf(user_name, user_location, gender, date_of_birth, lesion_area, current_time, image, predictions, top_3_classes, top_3_probs)
 
@@ -172,4 +180,4 @@ if uploaded_file is not None:
 footer = "Developed by Sumanth Nimmagadda, Kiran Alex Challagiri, and Bakka Samuel Abhishek. Connect with us on [LinkedIn](https://www.linkedin.com/in/sumanth-nimmagadda-472455221/)."
 st.markdown("---")
 st.markdown(footer)
-st.warning("Disclaimer: This is a demo product for educational purposes only. The classification results are for demonstration purposes and may not be accurate. Please consult a medical professional for diagnosis and treatment.",icon='⚠️')
+st.warning("Disclaimer: This is a demo product for educational purposes only. The classification results are for demonstration purposes and may not be accurate. Please consult a medical professional for diagnosis and treatment.", icon='⚠️')
