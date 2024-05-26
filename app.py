@@ -30,8 +30,8 @@ model = load_model_once()
 
 # Cache the prediction function
 @st.cache_data
-def cached_predict(image):
-    img = img_to_array(image)
+def cached_predict(_image):
+    img = img_to_array(_image)
     img = img / 255.0
     img = smart_resize(img, (380, 380))  # Resize the image
     img = np.expand_dims(img, axis=0)
