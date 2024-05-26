@@ -40,7 +40,7 @@ def cached_predict(_image):
 
 # Cache the PDF generation function
 @st.cache_data
-def generate_pdf(user_name, user_location, gender, date_of_birth, lesion_area, current_time, image, predictions, top_3_classes, top_3_probs):
+def generate_pdf(user_name, user_location, gender, date_of_birth, lesion_area, current_time, _image, predictions, top_3_classes, top_3_probs):
     pdf = FPDF()
     pdf.add_page()
 
@@ -67,7 +67,7 @@ def generate_pdf(user_name, user_location, gender, date_of_birth, lesion_area, c
 
     # Add image to PDF
     image_path = "temp_image.png"
-    image.save(image_path)
+    _image.save(image_path)
     pdf.image(image_path, x=10, y=None, w=100)
     pdf.ln(10)  # Space after the image
 
